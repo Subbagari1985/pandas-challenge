@@ -1,0 +1,392 @@
+/***************************
+### Note
+* Instructions have been included for each segment. You do not have to follow them exactly, but they are included to help you think through the steps.
+
+# Dependencies and Setup
+import pandas as pd
+import numpy as np
+
+# File to Load (Remember to Change These)
+file_to_load = "Resources/purchase_data.csv"
+
+# Read Purchasing File and store into Pandas data frame
+purchase_data = pd.read_csv(file_to_load)
+
+## Player Count
+
+* Display the total number of players
+
+
+df=pd.DataFrame(purchase_data)
+Unique_Players = df['SN'].nunique()
+data_pls = {'Total_Players':[Unique_Players]}
+Total_Players_df=pd.DataFrame(data_pls)
+Total_Players_df
+
+## Purchasing Analysis (Total)
+
+* Run basic calculations to obtain number of unique items, average price, etc.
+
+
+* Create a summary data frame to hold the results
+
+
+* Optional: give the displayed data cleaner formatting
+
+
+* Display the summary data frame
+
+
+Unique_Items=df['Item ID'].nunique()
+Average_format=df['Price'].mean()
+Avg_Price = str("$"+"{:.2f}".format(Average_format))
+Total_purchases=df['Purchase ID'].nunique()
+Total_Rev = df['Price'].sum()
+Total_Revenue = str("$"+"{:.2f}".format(Total_Rev))
+
+Output = {
+  "Number of Unique Items": [Unique_Items],
+  "Average Price": [Avg_Price],
+    "Number of Purchases": [Total_purchases],
+    "Total Revenue": [Total_Revenue]
+}
+Output_df=pd.DataFrame(Output)
+Output_df
+
+## Gender Demographics
+
+* Percentage and Count of Male Players
+
+
+* Percentage and Count of Female Players
+
+
+* Percentage and Count of Other / Non-Disclosed
+
+
+
+
+Gender_file = pd.read_csv(file_to_load, usecols = ['SN','Gender'])
+List_Players_df = pd.DataFrame(Gender_file)
+Total_Unique_Players = List_Players_df.drop_duplicates()
+Players_df=pd.DataFrame(Total_Unique_Players)
+s=Players_df.Gender
+counts=s.value_counts()
+percent=s.value_counts(normalize=True)
+percent100=s.value_counts(normalize=True).mul(100).round(2).astype(str) +'%'
+Output_G_Frame=pd.DataFrame({'Total_Count':counts,'Percentage of Players':percent100})
+Output_G_Frame
+
+
+
+## Purchasing Analysis (Gender)
+
+* Run basic calculations to obtain purchase count, avg. purchase price, avg. purchase total per person etc. by gender
+
+
+
+
+* Create a summary data frame to hold the results
+
+
+* Optional: give the displayed data cleaner formatting
+
+
+* Display the summary data frame
+
+Gender_Analysis = purchase_data.groupby("Gender")
+Number_of_Purchases=Gender_Analysis["Purchase ID"].count()
+Avg_PPrice= Gender_Analysis["Price"].mean()
+Total_Purchase_By_Gender=Gender_Analysis["Price"].sum()
+
+Avg_Total_Purchase_Person=Total_Purchase/counts
+Output_Gender_Analysis_df = pd.DataFrame({"Purchase Count": Number_of_Purchases, 
+                                    "Average Purchase Price": Avg_PPrice,
+                                    "Total Purchase Value":Total_Purchase_By_Gender,
+                                    "Avg Total Purchase per Person": Avg_Total_Purchase_Person})
+
+Final_Summary_Output= Output_Gender_Analysis_df.style.format({"Average Purchase Price":"${:,.2f}",
+                                  "Total Purchase Value":"${:,.2f}",
+                                  "Avg Total Purchase per Person":"${:,.2f}"})
+Output_Gender_Analysis.index.name ="Gender"
+Final_Summary_Output
+
+## Age Demographics
+
+* Establish bins for ages
+
+
+* Categorize the existing players using the age bins. Hint: use pd.cut()
+
+
+* Calculate the numbers and percentages by age group
+
+
+* Create a summary data frame to hold the results
+
+
+* Optional: round the percentage column to two decimal points
+
+
+* Display Age Demographics Table
+
+
+# Bins are   
+bins = [0,9.99,14.99,19.99,24.99,29.99,34.99,39.99,49.99]
+
+# Create the names for the bins
+group_names = ["<10", "10-14", "15-19", "20-24", "25-29", "30-34", "35-39", "40+"]
+purchase_data["Age Summary"] = pd.cut(purchase_data["Age"], bins, labels=group_names, include_lowest=True)
+By_Age = purchase_data.groupby("Age Summary")
+
+Count_Age= By_Age["SN"].nunique()
+Percentage_Age=(Count_Age/Unique_Players)*100
+
+Age_df=pd.DataFrame(({'Total_Count':Count_Age,'Percentage of Players':Percentage_Age}))
+Output_Age= Age_df.style.format({"Percentage of Players":"{:,.2f}%"})
+                                
+Output_Age.index.name =""
+
+Output_Age
+
+
+
+## Purchasing Analysis (Age)
+
+* Bin the purchase_data data frame by age
+
+
+* Run basic calculations to obtain purchase count, avg. purchase price, avg. purchase total per person etc. in the table below
+
+
+* Create a summary data frame to hold the results
+
+
+* Optional: give the displayed data cleaner formatting
+
+
+* Display the summary data frame
+
+# Bins are   
+Purchase_count=By_Age["Purchase ID"].count()
+
+Avg_PPrice_By_Age= By_Age["Price"].mean()
+Total_Purchase_By_Age=By_Age["Price"].sum()
+Avg_Total_Purchase_Person_By_Age=Total_Purchase_By_Age/Count_Age
+
+Output_Age_Analysis_df = pd.DataFrame({"Purchase Count": Purchase_count, 
+                                    "Average Purchase Price": Avg_PPrice_By_Age,
+                                    "Total Purchase Value":Total_Purchase_By_Age,
+                                    "Avg Total Purchase per Person": Avg_Total_Purchase_Person_By_Age})
+
+Final_Summary_Output_Age= Output_Age_Analysis_df.style.format({"Average Purchase Price":"${:,.2f}",
+                                  "Total Purchase Value":"${:,.2f}",
+                                  "Avg Total Purchase per Person":"${:,.2f}"})
+Output_Age_Analysis_df.index.name ="Age Ranges"
+Final_Summary_Output_Age
+
+
+## Top Spenders
+
+* Run basic calculations to obtain the results in the table below
+
+
+* Create a summary data frame to hold the results
+
+
+* Sort the total purchase value column in descending order
+
+
+* Optional: give the displayed data cleaner formatting
+
+
+* Display a preview of the summary data frame
+
+
+
+By_Player = purchase_data.groupby("SN")
+Purchase_count_By_Player=By_Player["Purchase ID"].count()
+
+Avg_Purchase_Price_By_Player= By_Player["Price"].mean()
+
+Total_Purchase_By_Player=By_Player["Price"].sum()
+Output_Spender_Analysis_df = pd.DataFrame({"Purchase Count": Purchase_count_By_Player, 
+                                    "Average Purchase Price": Avg_Purchase_Price_By_Player,
+                                    "Total Purchase Value":Total_Purchase_By_Player})
+Output_Spender_Analysis_df.index.name ="SN"
+Final_Summary_Output_Player=Output_Spender_Analysis_df.sort_values(["Total Purchase Value"],ascending=False).head()
+Final_Summary_Output_Player.style.format({"Average Purchase Price":"${:,.2f}",
+                                  "Total Purchase Value":"${:,.2f}"})
+
+
+## Most Popular Items
+
+* Retrieve the Item ID, Item Name, and Item Price columns
+
+
+* Group by Item ID and Item Name. Perform calculations to obtain purchase count, average item price, and total purchase value
+
+
+* Create a summary data frame to hold the results
+
+
+* Sort the purchase count column in descending order
+
+
+* Optional: give the displayed data cleaner formatting
+
+
+* Display a preview of the summary data frame
+
+
+
+MPI=purchase_data[["Item ID","Item Name","Price"]]
+By_Item=purchase_data.groupby(["Item ID", "Item Name"])
+Purchase_count_By_Item=By_Item["Price"].count()
+
+Total_Purchase_By_Item=By_Item["Price"].sum()
+
+
+Avg_Purchase_Price_By_Item= Total_Purchase_By_Item/Purchase_count_By_Item
+
+
+Total_Purchase_By_Item=By_Item["Price"].sum()
+
+Output_Item_Analysis_df = pd.DataFrame({"Purchase Count": Purchase_count_By_Item, 
+                                    "Average Purchase Price": Avg_Purchase_Price_By_Item,
+                                    "Total Purchase Value":Total_Purchase_By_Item})
+
+Final_Summary_Output_Item=Output_Item_Analysis_df.sort_values(["Purchase Count"],ascending=False).head()
+
+Final_Summary_Output_Item.style.format({"Average Purchase Price":"${:,.2f}",
+                                  "Total Purchase Value":"${:,.2f}"})
+                         
+
+
+## Most Profitable Items
+
+* Sort the above table by total purchase value in descending order
+
+
+* Optional: give the displayed data cleaner formatting
+
+
+* Display a preview of the data frame
+
+
+
+Final_Summary_Output_Item=Output_Item_Analysis_df.sort_values(["Total Purchase Value"],ascending=False).head()
+Final_Summary_Output_Item.style.format({"Average Purchase Price":"${:,.2f}",
+                                  "Total Purchase Value":"${:,.2f}"})
+
+
+
+******************************************************************************************************************
+#Look into Indexws, Dictionaries
+
+
+    
+    #Assigning the list from the csv to the variable data
+    data = list(csv_reader)
+#Calculating total number of Votes in the csv provided
+    Total_Votes = len(data)
+
+# read specific columns of csv file using Pandas
+df = pd.read_csv(datapath, usecols = ['Voter ID','County','Candidate'])
+
+#List of Candidates participated in the election
+unique_Candidates = df['Candidate'].unique()
+
+#Calculating Number of Votes for each candidate in the election
+Number_Votes_Candidates = pd.value_counts(df['Candidate'].values)
+
+#Calculating Percentages of Votes received for each candidate.
+for each in unique_Candidates:
+    percentages= (Number_Votes_Candidates/Total_Votes)*100
+
+#Creating a DataFrame to access information
+result={"Percentages":round(percentages,4),"Votes":Number_Votes_Candidates, "Candidate":unique_Candidates}
+result_df=pd.DataFrame(result)
+result_df = result_df.set_index(round(percentages,4))
+
+#Calculating who won the election using Loc and Dataframe
+Winner=round(percentages.max(), 4)
+winner_name= result_df.loc[Winner,"Candidate"]
+
+#Writing Output to text file
+with open("Analysis\PyPoll_Output_textfile.txt", 'w+') as f:
+    
+    f.write("Election Results"+'\n')
+    f.write("----------------------------------"+'\n')
+    f.write("Total Votes:  " + str(Total_Votes)+'\n')
+    f.write("----------------------------------"+'\n')
+
+    f.write(unique_Candidates[0] +":   "+str(round(percentages[0],4))+"%    ("+str(Number_Votes_Candidates[0])+")"+'\n')
+    f.write(unique_Candidates[1] +":   "+str(round(percentages[1],4))+"%    ("+str(Number_Votes_Candidates[1])+")"+'\n')
+    f.write(unique_Candidates[2] +":   "+str(round(percentages[2],4))+"%    ("+str(Number_Votes_Candidates[2])+")"+'\n')
+    f.write(unique_Candidates[3] +":   "+str(round(percentages[3],4))+"%    ("+str(Number_Votes_Candidates[3])+")"+'\n')
+    f.write("----------------------------------"+'\n')
+    f.write("Winner:  "+winner_name+'\n')
+    f.write("----------------------------------"+'\n')  
+f.close()
+
+#Reading Output from text file
+with open("Analysis\PyPoll_Output_textfile.txt", "r") as f:
+	print(f.read())
+
+*****************************************************************
+for row[2] in TotalList_Candidates:
+        if(row[2] not in myList_Candidates):
+    #   myList_Candidates.append(row[2])
+        Count.values=Count.values+1
+            myList_Candidates.append(i)
+    print(myList_Candidates)
+    print(Count)
+        #if(row[2] not in myList_Candidates):
+    #   myList_Candidates.append(row[2])
+            
+    #for each in myList_Candidates:
+    #   Count[each] = Count[each]+1
+
+
+
+
+*******************************************
+
+  
+print (dict( (l, lst.count(l) ) for l in set(lst)))
+Gender_file = pd.read_csv(file_to_load, usecols = ['SN','Gender'])
+Gender_file
+List_Players = Gender_file['SN'].unique()
+List_Pla=Gender_file['SN'].unique()
+List_Pla.value_counts()
+List_Players = pd.DataFrame(Gender_file)
+List_Players.describe()
+List_Players = Gender_file['SN'].unique()
+Male_Players=[]
+Total = len(List_Players)
+List_Players = pd.DataFrame(Gender_file)
+for row in Gender_file
+if(List_Players.row[1] == "Male"):
+    Male_Players.append(row[0])
+    
+Male_Players
+***********
+Total_Unique_Players = List_Players_df.drop_duplicates()
+Count = Total_Unique_Players['Gender'].value_counts()
+Count_Gender_df=pd.DataFrame(Count)
+Total = len(Total_Unique_Players)
+Male_Count=Count_Gender_df.loc["Male"]
+Female_Count=Count_Gender_df.loc["Female"]
+Other_Count=Count_Gender_df.loc["Other / Non-Disclosed"]
+Male_Percentage=round((Male_Count/Total)*100,2).astype(str)+'%'
+Female_Percentage=round((Female_Count/Total)*100,2).astype(str)+'%'
+Other_Percentage=round((Other_Count/Total)*100,2).astype(str)+'%'
+
+
+Output_Gender = {
+  "Gender": ["Male","Female","Other / Non-Disclosed"],
+  "Total_Count": [Male_Count,Female_Count,Other_Count],
+    "Percentage of Players": [Male_Percentage,Female_Percentage, Other_Percentage]
+    }
+Output_Gender_df=pd.DataFrame(Output_Gender)
